@@ -18,6 +18,49 @@ The core goal is to showcase **infrastructure resilience**:
 
 ---
 
+### 🏗️ Architecture Diagram
+
+This diagram illustrates the high-availability setup and the self-healing mechanism powered by Kubernetes Liveness Probes.
+
+```mermaid
+graph TD
+    %% Professional styling
+    classDef k8s fill:#326ce5,stroke:#fff,stroke-width:2px,color:#fff;
+    classDef container fill:#e1f5fe,stroke:#326ce5,color:#000;
+    classDef external fill:#fff,stroke:#333,stroke-dasharray: 5 5,color:#000;
+
+    %% External Actors
+    User["👤 External User / Browser"]:::external
+    
+    %% Kubernetes Cluster Scope
+    subgraph "☸️ Kubernetes Cluster"
+        
+        %% Health monitoring component
+        K8sController["👀 K8s Controller\n(Liveness Probe)"]:::k8s
+
+        %% Entry point service
+        Service["⚖️ K8s Service\n(LoadBalancer - Port 80)"]:::k8s
+
+        %% Application instances
+        subgraph "Deployment (Replicas: 2)"
+            Pod1["📦 Pod A\n(Flask Container :5000)"]:::container
+            Pod2["📦 Pod B\n(Flask Container :5000)"]:::container
+        end
+    end
+
+    %% User traffic flow
+    User == "HTTP Request (http://localhost)" ==> Service
+    Service -- "Load Balancing" --> Pod1
+    Service -- "Load Balancing" --> Pod2
+
+    %% Self-Healing monitoring flow (dashed lines)
+    K8sController -. "GET /health (Every 10s)" .-> Pod1
+    K8sController -. "GET /health (Every 10s)" .-> Pod2
+
+```
+
+---
+
 ### 🏗️ Architecture & Design Decisions
 
 As a Technical Manager, I prioritized stability and observability in the design:
