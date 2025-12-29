@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: monitor-deployment
+  labels:
+    app: monitor
+spec:
+  replicas: 2  # High Availability: run 2 copies of the pod to ensure redundancy
+  selector:
+    matchLabels:
+      app: monitor
+  template:
+    metadata:
+      labels:
+        app: monitor
+    spec:
+      containers:
+      - name: monitor-app
+        image: my-monitor-app:v1
+        imagePullPolicy: Never  # Use the local image built with Docker Desktop
+        ports:
+        - containerPort: 5000
+        
+        # --- SELF-HEALING CONFIGURATION ---
+        # Kubernetes calls this endpoint periodically.
+        # If it fails, the container is restarted automatically.
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 5  # Wait 5s before the first check
+          periodSeconds: 10       # Check every 10s

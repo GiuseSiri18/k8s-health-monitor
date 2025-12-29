@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: monitor-service
+spec:
+  # Expose the service externally (accessible via localhost on Docker Desktop)
+  type: LoadBalancer 
+  selector:
+    # Traffic is routed to pods with this label
+    app: monitor
+  ports:
+    - protocol: TCP
+      port: 80      # External port (browser)
+      targetPort: 5000 # Internal container port
